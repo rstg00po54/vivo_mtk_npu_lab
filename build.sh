@@ -74,29 +74,16 @@ if [[ "${SKIP_LITERT_SETUP:-0}" != "1" ]]; then
   bash tools/setup_litert_cpp_sdk.sh
 fi
 
-# CMake may keep NDK 25 inside cached toolchain paths after Gradle changes.
-CXX_DIR="$ROOT/android/app/.cxx"
-RECREATE_CXX=0
-if [[ -d "$CXX_DIR" ]]; then
-  if find "$CXX_DIR" -type f -name 'abseil-cpp-populate-gitclone.cmake' \
-       -print -quit | grep -q .; then
-    RECREATE_CXX=1
-    echo "Old Git-based Abseil checkout cache detected"
-  fi
-  while IFS= read -r -d '' cache; do
-    ndk_cache="$(grep -E '^(ANDROID_NDK|CMAKE_ANDROID_NDK):' "$cache" | head -n 1 || true)"
-    if [[ "$ndk_cache" == *"/ndk/"* && "$ndk_cache" != *"/ndk/$NDK_VERSION"* ]]; then
-      echo "Stale CMake toolchain detected: $ndk_cache"
-      RECREATE_CXX=1
-      break
-    fi
-  done < <(find "$CXX_DIR" -type f -name CMakeCache.txt -print0)
+# CMake/Ninja temporary sources and downloaded dependencies now live under
+# ~/.cache/vivo_mtk_npu_lab rather than /mnt/hgfs/android/app/.cxx.
+# The old .cxx folder is unused; do not delete it automatically.
+STAGING_PARENT="$HOME/.cache/vivo_mtk_npu_lab"
+mkdir -p "$STAGING_PARENT"
+if [[ "$(readlink -f "$STAGING_PARENT")" == /mnt/hgfs/* ]]; then
+  echo "ERROR: The native build staging area must be on Ubuntu local storage: $STAGING_PARENT" >&2
+  exit 2
 fi
-if [[ "$RECREATE_CXX" == "1" ]]; then
-  echo "Removing stale generated native build directory: $CXX_DIR"
-  rm -rf -- "$CXX_DIR"
-fi
-
+echo "Native CMake staging: $STAGING_PARENT (separate directory per checkout)"
 echo "Building independent NPU C++ Android app with NDK $NDK_VERSION..."
 bash ./gradlew --no-daemon -p android :app:assembleDebug "$@"
 
