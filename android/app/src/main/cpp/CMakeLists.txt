@@ -13,6 +13,16 @@ if(NOT DEFINED LITERT_CC_SDK_DIR OR
     "from the repository root before Gradle. Expected ${LITERT_CC_SDK_DIR}")
 endif()
 
+# LiteRT 2.3.0 uses OverridableFetchContent to fetch Abseil and other
+# dependencies. Its own CMake file hardcodes source directories below
+# CMAKE_BINARY_DIR. On VMware /mnt/hgfs, Git reports "dubious ownership"
+# when a new dependency clone checks out its tag. Ask the official SDK
+# helper to fetch *archives* instead of running git clone/checkout.
+# Supported by its OverridableFetchContent.cmake implementation.
+set(OVERRIDABLE_FETCH_CONTENT_GIT_REPOSITORY_AND_TAG_TO_URL ON
+    CACHE BOOL "Download LiteRT dependency source archives instead of Git clones" FORCE)
+message(STATUS "LiteRT dependencies: GitHub source archives (no git checkout)")
+
 # Official LiteRT 2.3.0 prebuilt C++ SDK target, not the older Interpreter API.
 add_subdirectory("${LITERT_CC_SDK_DIR}" "${CMAKE_BINARY_DIR}/litert_cc_sdk")
 include_directories("${LITERT_CC_SDK_DIR}")
