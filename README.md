@@ -65,6 +65,22 @@ models into the test app's private files directory via `run-as`, and captures
 C++ stage markers and relevant MediaTek/Neuron logcat lines. Reports are saved
 under `reports/`.
 
+### VMware shared-folder CMake build issue
+
+If this checkout lives under `/mnt/hgfs`, Git may refuse to check out LiteRT's
+CMake dependencies (e.g. Abseil) with `fatal: detected dubious ownership`
+followed by `Failed to checkout tag: '20260526.0'`. This is a **host Git
+ownership check**, not an MTK NPU or C++ compiler error.
+
+Use `./build.sh`. During that build only, it sets a **scoped**
+`safe.directory` exception for this project's `android/app/.cxx/*`
+dependency clones. It never updates `~/.gitconfig`. Do not use
+`git config --global --add safe.directory '*'`.
+
+If invoking Gradle directly on `/mnt/hgfs`, use `./build.sh` instead; that
+ensures the scoped fix applies to CMake's child Git processes. Retry without
+deleting any existing models or `third_party` SDK files.
+
 ### What PASS/FAIL means
 
 | C++ compilation | Meaning |
