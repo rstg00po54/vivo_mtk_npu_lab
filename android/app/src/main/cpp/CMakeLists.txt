@@ -40,13 +40,24 @@ include_directories("${LITERT_CC_SDK_DIR}")
 add_library(npu_probe SHARED probe_jni.cc)
 target_compile_features(npu_probe PRIVATE cxx_std_20)
 target_compile_options(npu_probe PRIVATE -Wall -Wextra -Wno-deprecated-declarations)
-# The LiteRT C++ API is header-heavy. The static litert_cc_api target alone
-# does not propagate all dependencies used by its public C++ headers (notably
-# Abseil flat_hash_map -> raw_hash_set). Link the official headers interface
-# target as well; it supplies the required Abseil libraries transitively.
+# The packaged LiteRT C++ 2.3.0 SDK exposes litert_cc_api, but does NOT
+# expose the litert_cc_api_headers interface target from the source checkout.
+# Linking that name would silently become "-llitert_cc_api_headers" and fail.
+#
+# LiteRT's public Options headers use absl::flat_hash_map. Its implementation
+# depends on absl::raw_hash_set, including the non-inline symbols
+# IterateOverFullSlots, DeallocateBackingArray, kSooControl, etc.
+# Link the actual Abseil CMake targets, not plain library-name strings.
+foreach(required_target IN ITEMS absl::flat_hash_map absl::raw_hash_set)
+    if(NOT TARGET ${required_target})
+        message(FATAL_ERROR "Required Abseil target is missing: ${required_target}")
+    endif()
+endforeach()
+
 target_link_libraries(npu_probe PRIVATE
     litert_cc_api
-    litert_cc_api_headers
+    absl::flat_hash_map
+    absl::raw_hash_set
     android
     log
 )
