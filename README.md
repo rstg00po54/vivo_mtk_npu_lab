@@ -67,19 +67,18 @@ under `reports/`.
 
 ### VMware shared-folder CMake build issue
 
-If this checkout lives under `/mnt/hgfs`, Git may refuse to check out LiteRT's
-CMake dependencies (e.g. Abseil) with `fatal: detected dubious ownership`
-followed by `Failed to checkout tag: '20260526.0'`. This is a **host Git
-ownership check**, not an MTK NPU or C++ compiler error.
+If the checkout lives in `/mnt/hgfs`, a Git-based dependency download may
+fail with `fatal: detected dubious ownership` and `Failed to checkout tag`.
+The **LiteRT SDK's official CMake fetch helper** supports converting GitHub
+Git/tag dependencies to source archives. This project now enables that mode in
+`android/app/src/main/cpp/CMakeLists.txt`.
 
-Use `./build.sh`. During that build only, it sets a **scoped**
-`safe.directory` exception for this project's `android/app/.cxx/*`
-dependency clones. It never updates `~/.gitconfig`. Do not use
-`git config --global --add safe.directory '*'`.
-
-If invoking Gradle directly on `/mnt/hgfs`, use `./build.sh` instead; that
-ensures the scoped fix applies to CMake's child Git processes. Retry without
-deleting any existing models or `third_party` SDK files.
+Use `./build.sh` after `git pull`. The script recognizes the stale Abseil
+git-clone CMake cache from earlier builds, deletes only generated
+`android/app/.cxx` build state, then rebuilds with archive downloads.
+No global `safe.directory` changes are needed. It never deletes model files,
+`third_party` SDK files or Gradle caches. It also pins NDK
+`27.2.12479018`.
 
 ### What PASS/FAIL means
 
