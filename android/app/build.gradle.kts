@@ -8,8 +8,8 @@ plugins {
 // the native CMake/Ninja build tree on the Ubuntu local filesystem.
 // Canonical project path ensures separate clones do not share stale caches.
 val nativeBuildId = Integer.toHexString(rootProject.projectDir.canonicalPath.hashCode())
-val nativeStagingDir = java.io.File(
-    System.getProperty("user.home"), ".cache/vivo_mtk_npu_lab/native_${nativeBuildId}"
+val nativeStagingDir = rootProject.file(
+    "${System.getProperty("user.home")}/.cache/vivo_mtk_npu_lab/native_${nativeBuildId}"
 )
 
 android {
