@@ -40,4 +40,13 @@ include_directories("${LITERT_CC_SDK_DIR}")
 add_library(npu_probe SHARED probe_jni.cc)
 target_compile_features(npu_probe PRIVATE cxx_std_20)
 target_compile_options(npu_probe PRIVATE -Wall -Wextra -Wno-deprecated-declarations)
-target_link_libraries(npu_probe PRIVATE litert_cc_api android log)
+# The LiteRT C++ API is header-heavy. The static litert_cc_api target alone
+# does not propagate all dependencies used by its public C++ headers (notably
+# Abseil flat_hash_map -> raw_hash_set). Link the official headers interface
+# target as well; it supplies the required Abseil libraries transitively.
+target_link_libraries(npu_probe PRIVATE
+    litert_cc_api
+    litert_cc_api_headers
+    android
+    log
+)
