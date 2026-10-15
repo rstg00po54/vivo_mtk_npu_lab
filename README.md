@@ -45,7 +45,7 @@ binaries are downloaded locally and ignored by Git.
 gradle -p android :app:assembleDebug
 
 # Or reuse an existing wrapper without changing the other project:
-../go/GoEngine-java/gradlew -p "$PWD/android" :app:assembleDebug
+../GoEngine-java/gradlew -p "$PWD/android" :app:assembleDebug
 ```
 
 3. Compare both TFLite models on the vivo (change paths to suit your machine):
@@ -85,5 +85,6 @@ confirmed repair.
 - `benchmark/`: compilation time, buffer allocation, inference timing
 - `models/`: *scripts/manifests only*, not weights or large binaries
 
-Documentation for the C++ SDK:
+GitHub Actions also performs an Android NDK build on changes to main and 
+keeps the debug APK as a short-lived workflow artifact. Do not infer NPU\nhardware correctness from a CI build.\n\nDocumentation for the C++ SDK:
 https://developers.google.com/edge/litert/next/android_cpp_sdk
