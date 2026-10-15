@@ -65,25 +65,30 @@ models into the test app's private files directory via `run-as`, and captures
 C++ stage markers and relevant MediaTek/Neuron logcat lines. Reports are saved
 under `reports/`.
 
-### VMware shared-folder CMake build issue
+### VMware shared-folder CMake builds
 
-If the checkout lives in `/mnt/hgfs`, a Git-based dependency download may
-fail with `fatal: detected dubious ownership` and `Failed to checkout tag`.
-The **LiteRT SDK's official CMake fetch helper** supports converting GitHub
-Git/tag dependencies to source archives. This project now enables that mode in
-`android/app/src/main/cpp/CMakeLists.txt`.
+`/mnt/hgfs` is fine for the project **source** but unreliable for
+CMake's generated files and extracted Abseil/FlatBuffers dependencies.
+In particular, `flatbuffers-25.9.23/java/src/test/java/DictionaryLookup`
+may fail with `Problem with archive_write_header()` when unpacked there.
 
-Use `./build.sh` after `git pull`. The script recognizes the stale Abseil
-git-clone CMake cache from earlier builds, deletes only generated
-`android/app/.cxx` build state, then rebuilds with archive downloads.
-No global `safe.directory` changes are needed. It never deletes model files,
-`third_party` SDK files or Gradle caches. It also pins NDK
-`27.2.12479018`. The build script detects stale NDK 25
-CMake configuration, clears only generated `android/app/.cxx` native outputs,
-checks for C++20 `<ranges>`, and installs the required NDK with
-`sdkmanager` when the command-line tools are available. It backs up a
-deprecated project-local `ndk.dir` entry before removing it; no global
-Android Studio settings are changed.
+The Android Gradle plugin supports the native
+`externalNativeBuild.cmake.buildStagingDirectory` property. This project
+now directs the CMake/Ninja **build tree** and downloaded dependency sources
+into the Ubuntu home directory:
+
+```text
+~/.cache/vivo_mtk_npu_lab/native_<checkout-hash>/
+```
+
+The APK still appears in `android/app/build/outputs/apk/debug/` under
+the project, and all source files remain in the Git checkout. The
+`build.sh` script creates the staging parent directory, selects NDK
+`27.2.12479018` and checks `<ranges>`. Old
+`android/app/.cxx` output under the shared folder is no longer used; it
+is deliberately left intact, not deleted automatically. No need to move
+or re-clone your repo. If you have multiple checkouts, their native build
+trees have separate location hashes.
 
 ### What PASS/FAIL means
 
