@@ -2,6 +2,16 @@ plugins {
     id("com.android.application")
 }
 
+// LiteRT's CMake SDK unpacks Abseil and FlatBuffers into CMAKE_BINARY_DIR.
+// VMware shared folders (/mnt/hgfs) cannot reliably represent some of those
+// archive entries. Keep source files in the checked-out repository, but put
+// the native CMake/Ninja build tree on the Ubuntu local filesystem.
+// Canonical project path ensures separate clones do not share stale caches.
+val nativeBuildId = Integer.toHexString(rootProject.projectDir.canonicalPath.hashCode())
+val nativeStagingDir = java.io.File(
+    System.getProperty("user.home"), ".cache/vivo_mtk_npu_lab/native_${nativeBuildId}"
+)
+
 android {
     namespace = "com.vivomtknpulab"
     compileSdk = 35
@@ -38,6 +48,7 @@ android {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
+            buildStagingDirectory = nativeStagingDir
         }
     }
 
