@@ -27,21 +27,16 @@ jobs:
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
 
-      - name: Install Gradle 8.5
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.5"
-
       - name: Validate scripts
         run: |
-          bash -n tools/setup_litert_cpp_sdk.sh
+          bash -n tools/setup_litert_cpp_sdk.sh build.sh gradlew
           python3 -m py_compile tools/run_probe.py
 
       - name: Fetch official LiteRT 2.3.0 C++ SDK
         run: bash tools/setup_litert_cpp_sdk.sh
 
       - name: Build NDK APK
-        run: gradle -p android :app:assembleDebug --stacktrace
+        run: bash ./gradlew -p android :app:assembleDebug --stacktrace
 
       - name: Publish debug APK for physical vivo testing
         uses: actions/upload-artifact@v4

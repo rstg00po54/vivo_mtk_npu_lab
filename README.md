@@ -25,27 +25,27 @@ The `android/` project is a minimal debug APK:
 Ubuntu host: Android SDK 35, NDK 27.2.12479018, CMake 3.22.1, Java 17,
 Python 3, ADB. Phone: vivo X300 Pro; USB/wireless ADB enabled.
 
-1. Clone the repository and prepare matching LiteRT C++ SDK/so binaries:
+1. Clone the repository, then build with its **own** Gradle Wrapper:
 
 ```bash
 git clone https://github.com/rstg00po54/vivo_mtk_npu_lab.git
 cd vivo_mtk_npu_lab
-bash tools/setup_litert_cpp_sdk.sh
+./build.sh
 ```
+
+If executable permissions were lost in a copy: `bash build.sh`.
+The script downloads matching LiteRT C++ 2.3.0 SDK and uses the repository's
+own Gradle 8.5 Wrapper, which downloads Gradle into `~/.gradle` on first use.
+Neither command needs `GoEngine-java` code or its Gradle scripts.
 
 The setup script downloads official **v2.3.0** `litert_cc_sdk.zip` and the
 same `libLiteRt.so` from `litert-2.3.0.aar` (Google Maven). Third-party
 binaries are downloaded locally and ignored by Git.
 
-2. Build the isolated APK from the existing working Gradle 8.5 wrapper,
-   or any compatible installed Gradle:
+2. For direct Gradle commands (after running the LiteRT SDK setup step):
 
 ```bash
-# If installed Gradle is available:
-gradle -p android :app:assembleDebug
-
-# Or reuse an existing wrapper without changing the other project:
-../GoEngine-java/gradlew -p "$PWD/android" :app:assembleDebug
+./gradlew -p android :app:assembleDebug
 ```
 
 3. Compare both TFLite models on the vivo (change paths to suit your machine):
