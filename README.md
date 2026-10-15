@@ -78,7 +78,12 @@ git-clone CMake cache from earlier builds, deletes only generated
 `android/app/.cxx` build state, then rebuilds with archive downloads.
 No global `safe.directory` changes are needed. It never deletes model files,
 `third_party` SDK files or Gradle caches. It also pins NDK
-`27.2.12479018`.
+`27.2.12479018`. The build script detects stale NDK 25
+CMake configuration, clears only generated `android/app/.cxx` native outputs,
+checks for C++20 `<ranges>`, and installs the required NDK with
+`sdkmanager` when the command-line tools are available. It backs up a
+deprecated project-local `ndk.dir` entry before removing it; no global
+Android Studio settings are changed.
 
 ### What PASS/FAIL means
 
