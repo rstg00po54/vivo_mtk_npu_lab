@@ -5,6 +5,8 @@ plugins {
 android {
     namespace = "com.vivomtknpulab"
     compileSdk = 35
+    // Keep the NDK in sync with the project's CI and vivo toolchain.
+    ndkVersion = "27.2.12479018"
 
     defaultConfig {
         applicationId = "com.vivomtknpulab"
