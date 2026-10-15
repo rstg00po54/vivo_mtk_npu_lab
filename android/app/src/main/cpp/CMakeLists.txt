@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.22.1)
 project(vivo_mtk_npu_probe LANGUAGES C CXX)
 
+# Catch old NDK toolchains before building hundreds of LiteRT/Abseil objects.
+if(ANDROID AND DEFINED ANDROID_NDK)
+  if(NOT "${ANDROID_NDK}" MATCHES "/ndk/27[.]2[.]12479018/?$")
+    message(FATAL_ERROR
+      "LiteRT C++20 needs NDK 27.2.12479018, but CMake received "
+      "ANDROID_NDK=${ANDROID_NDK}. Use ./build.sh to select NDK 27.2 "
+      "and invalidate old android/app/.cxx native cache.")
+  endif()
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
