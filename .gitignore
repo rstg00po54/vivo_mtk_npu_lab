@@ -1,0 +1,24 @@
+# Local Android / NDK outputs
+.gradle/
+**/build/
+local.properties
+.cxx/
+.idea/
+*.iml
+
+# Downloaded third-party SDK, AARs, and native binaries
+third_party/
+*.aar
+*.so
+*.zip
+
+# Device models and test reports; never upload Human SL weights
+*.tflite
+*.onnx
+*.bin
+*.bin.gz
+*.rknn
+models/
+reports/
+__pycache__/
+*.pyc
